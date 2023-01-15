@@ -1,13 +1,24 @@
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
-const users = require('./db/users');
-const articles = require('./db/articles');
 const cors = require('cors');
-const { at } = require('./db/users');
+const mysql = require('mysql');
 
 const app = express();
 const port = 7100;
+
+const connection = mysql.createConnection({
+  host: "caredog-test.c0o6spnernvu.ap-northeast-2.rds.amazonaws.com",
+  user: "sparta",
+  password: "tmvkfmxk2022",
+  database: "sparta_backup"
+})
+
+connection.connect()
+// connection.query("select * from articles", (error, rows, fields) => {
+//   // console.log(rows)
+// }) //콜백함수
+
 
 app.use(cookieParser());
 app.use(express.json());
@@ -28,140 +39,119 @@ const jwtConfig = {
   },
 };
 
-// 메인페이지 게시글 (완료)
+// 메인페이지 게시글
 app.get('/', (req, res) => {
-  res.send([...articles].splice(0,10));
-});
+  const {page} = req.query
+  const perpage = 10
+  const startIndex = ((page || 1)  -1 ) * perpage
+  connection.query(`select count(*) from hs1_articles`, (error, rows, fields) => {
+    const lastPage = Math.ceil(rows[0].count / perpage)
+    connection.query(`select * from hs1_articles order by id desc limit ${perpage} offset ${startIndex}`, (error, rows, fields) => {
+      res.json({
+          pageInfo : {
+            perpage,
+            lastPage,
+            currentPage: page || 1
+          },
+          rows})
+    })
+  })
+})
 
-// 로그인 (완료)
+
+// 로그인 
 app.post('/login', (req, res) => {
   const { email, password } = req.body;
-  const user = users.find(
-    (user) => user.email === email && user.password === password
-  );
+  connection.query(`select * from users where email = "${email}" and password = "${password}"`, (error, rows, fields) => {
 
-  if (!user) {
-    return res.send('아이디를 찾지 못하였습니다');
-  }
+    if (!rows[0]) {
+      return res.send('찾지 못하였습니다');
+    }
 
-  if (user.password !== password) {
-    return res.send('비밀번호를 확인해주세요');
-  }
+    const token = jwt.sign({ email : rows[0].email }, jwtConfig.secretKey, jwtConfig.options);
+    res.cookie('jwt', token); // res.cookie('만들고싶은이름', 만들고싶은값)
+    // res.send({ result: true });
 
-  const token = jwt.sign({ name: user.name, id: user.id }, jwtConfig.secretKey, jwtConfig.options);
-  res.cookie('jwt', token); // res.cookie('만들고싶은이름', 만들고싶은값)
-  // res.send({ result: true });
-  res.json("로그인 완료")
+    res.send("로그인 완료")
+    // res.send(rows[0])
+  }) 
 });
 
-// 유저 정보 확인 (완료)
+// 유저 정보 확인
 app.get('/users', (req, res) => {
-
-  const userToken = jwt.verify(req.cookies.jwt, jwtConfig.secretKey);
-  if (!userToken) {
+  
+  if (!req.cookies.jwt) {
     return res.send('로그인부터 해주세요');
   }
+  
+  const userToken = jwt.verify(req.cookies.jwt, jwtConfig.secretKey);
+  
+  const {email} = userToken
+  connection.query(`select name, email from users where email = "${email}"`, (error, rows, fields) => {
 
-  const user = users.find(user => user.id === userToken.id);
-  if (!user) {
-    return res.send('회원 정보가 잘못되었습니다');
-  }
-  res.json(user);
+    res.send(rows[0])
+  })
 });
 
-// 게시글 상세조회 (완료)
+// 게시글 상세조회
 app.get('/articles/:id', (req, res) => {
   const { id } = req.params
-  const article = articles.find(art => art.id == id)
-
-  if (!article) {
-    return res.json({message: "게시글 조회 실패"})
-  }
-
-  res.json(article);
+  connection.query(`select * from articles where id = "${id}"`, (error, rows, fields) => {
+    if (!rows[0]) {
+      return res.json({message: "게시글 조회 실패"})
+    }
+  res.json(rows[0])
+  })
 });
 
-// 게시글 작성 (완료)
+// 게시글 작성 
 app.post('/articles', (req, res) => {
-  const {title, contents} = req.body
-  const created_at = new Date()
-  console.log({title, contents})
-
+  
   if(!req.cookies.jwt) {
     return res.json({message: "로그인 이후 이용 가능합니다."})
   }
-  
-  const user = users.find(user => user.id === jwt.verify(req.cookies.jwt, jwtConfig.secretKey).id)
+  // console.log(req.cookies.jwt)
+  const {title, contents} = req.body
+  // const created_at = new Date()
 
-  // 게시글 id값에 +1 시켜서 적용하는 방법이긴 한데 db를 연결했을때 어떻게 될지 잘 모르겠음.
-  const maxObjArr = articles.reduce( (prev, value) => {
-    return prev.guildMemberCount >= value.guildMemberCount ? prev : value
-  });
-  articles.push({id : maxObjArr.id + 1,title, contents, user_id: user.id,created_at,count:0 })
+  connection.query(`insert into hs1_articles (title, contents) values("${title}", "${contents}")`, (error, rows, fields) => {
 
-  res.send('게시글 작성 완료');
+  res.json("작성 완료")
+  })
 });
 
-// 게시글 수정 (완료)
+// 게시글 수정 
 app.put('/articles/:id', (req, res) => {
 
   // 로그인 여부 판단
   if (!req.cookies.jwt) {
     return res.status(401).json({message : "로그인해주세요"})
   }
-
   const { id } = req.params
-  const article = articles.find(art => art.id == id)
+  const {title, contents} = req.body
 
-  const user = users.find(user => user.id === jwt.verify(req.cookies.jwt, jwtConfig.secretKey).id)
+  connection.query(`update hs1_articles set title = "${title}" , contents = "${contents}" where id = ${id}`, (error, rows, fields) => {
 
-  if (user.id !== article.user_id) {
-    return res.json({message: "권한 없음"})
-  }
-
-  const title = req.body.title || article.title
-  const contents = req.body.contents || article.contents
-
-  article.title = title
-  article.contents = contents
-  
   res.json({message: "수정 완료"})
+  })
 });
 
 
-// 게시글 삭제 (완료)
+// 게시글 삭제 
 app.delete('/articles/:id', (req, res) => {
 
-  // 로그인 여부 판단
   if (!req.cookies.jwt) {
     return res.status(401).json({message : "로그인해주세요"})
   }
 
   const { id } = req.params
-  const article = articles.find(art => art.id == id)
 
-  const user = users.find(user => user.id === jwt.verify(req.cookies.jwt, jwtConfig.secretKey).id)
-
-  if (user.id !== article.user_id) {
-    return res.json({message: "권한 없음"})
-  }
-
-  const index = articles.indexOf(article);
-    articles.splice(index, 1);
-
-  res.send('게시글 삭제');
+  connection.query(`delete from hs1_articles where id = "${id}"`, (error, rows, fields) => {
+  
+    res.json("삭제 완료")
+  })
 });
 
 app.listen(port, () => {
   console.log(port, '서버 실행');
 });
-
-// // 쿠키파서 사용 등록
-// const cookieParser = require("cookie-parser")
-// app.use(cookieParser())
-
-// // 쿠키 가져오기
-// const email = req.cookies.email
-
-// // 쿠키 만들기
-// res.cookie("email", email)
