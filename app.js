@@ -15,10 +15,6 @@ const connection = mysql.createConnection({
 })
 
 connection.connect()
-// connection.query("select * from articles", (error, rows, fields) => {
-//   // console.log(rows)
-// }) //콜백함수
-
 
 app.use(cookieParser());
 app.use(express.json());
@@ -40,16 +36,16 @@ const jwtConfig = {
 };
 
 // 메인페이지 게시글
-app.get('/', (req, res) => {
-  const {page} = req.query
-  const perpage = 10
-  const startIndex = ((page || 1)  -1 ) * perpage
+app.get('/articles', (req, res) => {
+  const { page } = req.query
+  const perPage = 10
+  const startIndex = ((page || 1)  -1 ) * perPage
   connection.query(`select count(*) from hs1_articles`, (error, rows, fields) => {
-    const lastPage = Math.ceil(rows[0].count / perpage)
-    connection.query(`select * from hs1_articles order by id desc limit ${perpage} offset ${startIndex}`, (error, rows, fields) => {
+    const lastPage = Math.ceil(rows[0]['count(*)'] / perPage)
+    connection.query(`select * from hs1_articles order by id desc limit ${perPage} offset ${startIndex}`, (error, rows, fields) => {
       res.json({
           pageInfo : {
-            perpage,
+            perPage,
             lastPage,
             currentPage: page || 1
           },
@@ -65,15 +61,15 @@ app.post('/login', (req, res) => {
   connection.query(`select * from users where email = "${email}" and password = "${password}"`, (error, rows, fields) => {
 
     if (!rows[0]) {
-      return res.send('찾지 못하였습니다');
+      return res.json({message: "찾지 못하였습니다"});
     }
 
     const token = jwt.sign({ email : rows[0].email }, jwtConfig.secretKey, jwtConfig.options);
-    res.cookie('jwt', token); // res.cookie('만들고싶은이름', 만들고싶은값)
+    res.cookie('jwt', token); 
+    // res.cookie('만들고싶은이름', 만들고싶은값)
     // res.send({ result: true });
 
-    res.send("로그인 완료")
-    // res.send(rows[0])
+    res.json({message: "로그인 완료"})
   }) 
 });
 
@@ -81,7 +77,7 @@ app.post('/login', (req, res) => {
 app.get('/users', (req, res) => {
   
   if (!req.cookies.jwt) {
-    return res.send('로그인부터 해주세요');
+    return res.json({message: "로그인부터 해주세요"});
   }
   
   const userToken = jwt.verify(req.cookies.jwt, jwtConfig.secretKey);
@@ -108,22 +104,21 @@ app.get('/articles/:id', (req, res) => {
 app.post('/articles', (req, res) => {
   
   if(!req.cookies.jwt) {
-    return res.json({message: "로그인 이후 이용 가능합니다."})
+    return res.json({message: "로그인 이후 이용 가능합니다"})
   }
-  // console.log(req.cookies.jwt)
+
   const {title, contents} = req.body
   // const created_at = new Date()
 
   connection.query(`insert into hs1_articles (title, contents) values("${title}", "${contents}")`, (error, rows, fields) => {
 
-  res.json("작성 완료")
+  res.json({message: "작성 완료"})
   })
 });
 
 // 게시글 수정 
 app.put('/articles/:id', (req, res) => {
 
-  // 로그인 여부 판단
   if (!req.cookies.jwt) {
     return res.status(401).json({message : "로그인해주세요"})
   }
@@ -153,5 +148,5 @@ app.delete('/articles/:id', (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(port, '서버 실행');
+  console.log(port, "서버 실행");
 });
