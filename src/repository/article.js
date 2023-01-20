@@ -16,7 +16,7 @@ const getArticles = async (perPage, startIndex) => {
 
 // 게사글 상세조회
 const getArticle = async (id) => {
-    return await findOneById("articels", id)
+    return await findOneById("articles", id)
 }
 
 // 게시글 작성
