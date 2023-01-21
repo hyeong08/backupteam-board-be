@@ -21,5 +21,9 @@ const userInfo = async (req, res) => {
     const inFo = await getUserInfo(id)
     return res.json(inFo)
 }
+const logout = (req, res) => {
+    res.clearCookie('jwt')
+    res.json({message: "로그아웃"})
+}
 
-module.exports = {login,userInfo}
+module.exports = {login,userInfo,logout}
