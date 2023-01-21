@@ -1,6 +1,6 @@
-// const jwt = require('jsonwebtoken');
-// const {jwtConfig} = require("../config/config")
-const {getArticles, getArticle} = require('../repository/article')
+const jwt = require('jsonwebtoken');
+const {jwtConfig} = require("../config/config")
+const {getArticles, getArticle, createArticle} = require('../repository/article')
 
 const allArticle = async (req, res) => {
     const { page } = req.query
@@ -19,14 +19,15 @@ const detailArticle = async (req, res) => {
     return res.json(article)
 }
 
-// const postArticle = async (req, res) => {
-//     if(!req.cookies.jwt) {
-//       return res.json({message: "로그인 이후 이용 가능합니다"})
-//     }
-//     const {title, contents} = req.body
-//     await createArticle(title,contents,id)
-//     return res.json({message: "작성 완료"})
-// }
+const postArticle = async (req, res) => {
+    if(!req.cookies.jwt) {
+      return res.json({message: "로그인 이후 이용 가능합니다"})
+    }
+    const {id} = jwt.verify(req.cookies.jwt, jwtConfig.secretKey)
+    const {title, contents} = req.body
+    await createArticle(id,title,contents)
+    return res.json({message: "작성 완료"})
+}
 
 // const putArticle = async (req, res) => {
 //     if (!req.cookies.jwt) {
@@ -47,4 +48,4 @@ const detailArticle = async (req, res) => {
 //     return res.json({message : "삭제 완료"})
 // }
 
-module.exports = {allArticle, detailArticle}
+module.exports = {allArticle, detailArticle, postArticle}
