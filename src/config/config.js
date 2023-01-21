@@ -1,4 +1,3 @@
-
 const jwtConfig = {
   secretKey: 'YoUrSeCrEtKeY',
   options: {

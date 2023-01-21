@@ -11,7 +11,8 @@ const port = 7100;
 app.use(cookieParser());
 app.use(express.json());
 app.use(cors(corsOptions));
-app.use('/', [userRouter, articleRouter])
+app.use('/articles', articleRouter)
+app.use(userRouter)
 
 app.listen(port, () => {
   console.log(port, "서버 실행");

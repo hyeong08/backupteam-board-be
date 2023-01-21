@@ -1,7 +1,6 @@
 const jwt = require("jsonwebtoken");
-const jwtConfig = require('../config/config');
-const {getUserByEmailAndPassword, getUserInfo} = require('../repository')
-
+const {jwtConfig} = require('../config/config');
+const {getUserByEmailAndPassword,getUserInfo} = require('../repository/user.js')
 
 const login = async (req, res) => {
     const { email, password } = req.body;
@@ -9,7 +8,7 @@ const login = async (req, res) => {
     if(!user) {
       return res.status(404).json({message: "찾지 못하였습니다"})
     }
-    const token = jwt.sign({ email : rows[0].email }, jwtConfig.secretKey, jwtConfig.options);
+    const token = jwt.sign({ id: user.id }, jwtConfig.secretKey, jwtConfig.options);
     res.cookie('jwt', token);
     return res.json({message: "로그인 완료"})
 }
@@ -18,9 +17,9 @@ const userInfo = async (req, res) => {
       return res.json({message: "로그인부터 해주세요"});
     }
     const userToken = jwt.verify(req.cookies.jwt, jwtConfig.secretKey);
-    const {email} = userToken
-    const inFo = await getUserInfo
-    return res.send(inFo)
+    const {id} = userToken
+    const inFo = await getUserInfo(id)
+    return res.json(inFo)
 }
 
 module.exports = {login,userInfo}

@@ -5,7 +5,7 @@ const sequelize = new Sequelize('sparta_backup', 'sparta', 'tmvkfmxk2022', {
     dialect: 'mysql'
 });
 
-const User = sequelize.define('users', {
+const u = sequelize.define('users', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -21,4 +21,4 @@ const User = sequelize.define('users', {
     updatedAt: false
 });
 
-module.exports = {User}
+module.exports = {u}

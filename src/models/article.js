@@ -5,19 +5,18 @@ const sequelize = new Sequelize('sparta_backup', 'sparta', 'tmvkfmxk2022', {
     dialect: 'mysql'
 });
 
-const Article = sequelize.define('articles', {
+const a = sequelize.define('hs1_articles', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
     },
     title: DataTypes.STRING,
-    contents: DataTypes.TEXT,
+    contents: DataTypes.STRING,
     count: {
         type : DataTypes.INTEGER,
         defaultValue : 0
     },
-    user_id: DataTypes.INTEGER,
     created_at: DataTypes.DATE
 }, {
     timestamps: true,
@@ -25,4 +24,4 @@ const Article = sequelize.define('articles', {
     updatedAt: false
 });
 
-module.exports = {Article}
+module.exports = {a}

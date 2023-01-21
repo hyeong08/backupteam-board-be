@@ -1,19 +1,13 @@
-const jwt = require('jsonwebtoken');
-const {jwtConfig} = require("../config/config")
-const {getArticles, getArticle, createArticle, updateArticle, deleteArticle} = require('../repository')
+// const jwt = require('jsonwebtoken');
+// const {jwtConfig} = require("../config/config")
+const {getArticles, getArticle} = require('../repository/article')
 
 const allArticle = async (req, res) => {
     const { page } = req.query
-    const perPage = 10
+    const perPage = 20
     const startIndex = ((page || 1) -1 ) * perPage
-    const article = await getArticles(perPage, startIndex)
-    return res.json({
-            pageInfo : {
-            perPage,
-            lastPage,
-            currentPage: page || 1
-            },
-            article})
+    const {lastPage,rows} = await getArticles(perPage, startIndex)
+    return res.json({pageInfo : {perPage,lastPage,currentPage: page || 1}, articles: rows})
 }
 
 const detailArticle = async (req, res) => {
@@ -24,40 +18,33 @@ const detailArticle = async (req, res) => {
         }
     return res.json(article)
 }
-  
-const postArticle = async (req, res) => {
-    if(!req.cookies.jwt) {
-      return res.json({message: "로그인 이후 이용 가능합니다"})
-    }
-    const {title, contents} = req.body
-    await createArticle(title,contents,id)
-    return res.json({message: "작성 완료"})
-}
 
-const putArticle = async (req, res) => {
-    if (!req.cookies.jwt) {
-      return res.status(401).json({message : "로그인해주세요"})
-    }
-    const { id } = req.params
-    const {title, contents} = req.body
-    await updateArticle(title,contents,id)
-    return res.json({message: "수정 완료"})
-}
-  
+// const postArticle = async (req, res) => {
+//     if(!req.cookies.jwt) {
+//       return res.json({message: "로그인 이후 이용 가능합니다"})
+//     }
+//     const {title, contents} = req.body
+//     await createArticle(title,contents,id)
+//     return res.json({message: "작성 완료"})
+// }
 
-const delArticle = async (req, res) => {
-    if (!req.cookies.jwt) {
-      return res.status(401).json({message : "로그인해주세요"})
-    }
-    const { id } = req.params
-    await deleteArticle(id)
-    return res.json({message : "삭제 완료"})
-}
+// const putArticle = async (req, res) => {
+//     if (!req.cookies.jwt) {
+//       return res.status(401).json({message : "로그인해주세요"})
+//     }
+//     const { id } = req.params
+//     const {title, contents} = req.body
+//     await updateArticle(title,contents,id)
+//     return res.json({message: "수정 완료"})
+// }
 
-module.exports = {
-    allArticle,
-    detailArticle,
-    postArticle,
-    putArticle,
-    delArticle
-}
+// const delArticle = async (req, res) => {
+//     if (!req.cookies.jwt) {
+//       return res.status(401).json({message : "로그인해주세요"})
+//     }
+//     const { id } = req.params
+//     await deleteArticle(id)
+//     return res.json({message : "삭제 완료"})
+// }
+
+module.exports = {allArticle, detailArticle}

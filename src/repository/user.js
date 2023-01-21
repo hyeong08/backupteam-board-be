@@ -1,16 +1,13 @@
-const { User } = require("../models/user")
+const {u} = require("../models/user.js")
 
 // 로그인 
 const getUserByEmailAndPassword = async (email, password) => {
-    return await User.findOne({where: {email, password}})
+    return await u.findOne({where: {email, password}})
 }
   
 // 유저 정보 확인
  const getUserInfo = async (id) => {
-    return await User.findByPk(id)
+    return await u.findByPk(id)
 }
 
-module.exports = {
-    getUserByEmailAndPassword,
-    getUserInfo
-}
+module.exports = {getUserByEmailAndPassword,getUserInfo}
