@@ -7,7 +7,7 @@ const allArticle = async (req, res) => {
     const perPage = 20
     const startIndex = ((page || 1) -1 ) * perPage
     const {lastPage,rows} = await getArticles(perPage, startIndex)
-    return res.json({pageInfo : {perPage,lastPage,currentPage: page || 1}, articles: rows})
+    res.json({pageInfo : {perPage,lastPage,currentPage: page || 1}, articles: rows})
 }
 
 const detailArticle = async (req, res) => {
@@ -16,7 +16,7 @@ const detailArticle = async (req, res) => {
         if (!article) {
             return res.json({message: "게시글 조회 실패"})
         }
-    return res.json(article)
+    res.json(article)
 }
 
 const postArticle = async (req, res) => {
@@ -26,7 +26,7 @@ const postArticle = async (req, res) => {
     const {id} = jwt.verify(req.cookies.jwt, jwtConfig.secretKey)
     const {title, contents} = req.body
     await createArticle(id,title,contents)
-    return res.json({message: "작성 완료"})
+    res.json({message: "작성 완료"})
 }
 
 const putArticle = async (req, res) => {
@@ -36,7 +36,7 @@ const putArticle = async (req, res) => {
     const { id } = req.params
     const {title, contents} = req.body
     await updateArticle(id,title,contents)
-    return res.json({message: "수정 완료"})
+    res.json({message: "수정 완료"})
 }
 
 const delArticle = async (req, res) => {
@@ -51,7 +51,7 @@ const delArticle = async (req, res) => {
         return res.json({message: "할수없음"})
     }
     await deleteArticle(id)
-    return res.json({message : "삭제 완료"})
+    res.json({message : "삭제 완료"})
 }
 
 module.exports = {allArticle, detailArticle, postArticle, putArticle, delArticle}
