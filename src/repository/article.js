@@ -17,20 +17,14 @@ const createArticle = async (id, title, contents) => {
     return await a.create({user_id : id, title, contents})
 }
 
-// // 게시글 수정
-// const updateArticle = async (title, contents, id) => {
-//     return await conn.execute(
-//         "update articles set title = ?, contents = ? where id = ?",
-//         [title, contents, id]
-//     )
-// }
+// 게시글 수정
+const updateArticle = async (id, title, contents) => {
+    return await a.update({title, contents}, {where:{id}})
+}
 
-// // 게시글 삭제
-// const deleteArticle = async (id) => {
-//     return await conn.execute(
-//         "delete from articles where id = ?",
-//         [id]
-//     )
-// }
+// 게시글 삭제
+const deleteArticle = async (id) => {
+    return await a.destroy({where: {id}})
+}
 
-module.exports = {getArticles, getArticle, createArticle}
+module.exports = {getArticles, getArticle, createArticle, updateArticle, deleteArticle}

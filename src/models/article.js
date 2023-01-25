@@ -5,7 +5,7 @@ const sequelize = new Sequelize('sparta_backup', 'sparta', 'tmvkfmxk2022', {
     dialect: 'mysql'
 });
 
-const a = sequelize.define('hs1_articles', {
+const a = sequelize.define('articles', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -13,10 +13,8 @@ const a = sequelize.define('hs1_articles', {
     },
     title: DataTypes.STRING,
     contents: DataTypes.STRING,
-    count: {
-        type : DataTypes.INTEGER,
-        defaultValue : 0
-    },
+    count: DataTypes.INTEGER,
+    user_id: DataTypes.INTEGER,
     created_at: DataTypes.DATE
 }, {
     timestamps: true,

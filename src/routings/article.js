@@ -1,7 +1,7 @@
 const express = require("express")
 const router = express.Router()
 
-const {allArticle, detailArticle, postArticle} = require("../controller/article")
+const {allArticle, detailArticle, postArticle, putArticle, delArticle} = require("../controller/article")
 
 // 게시글 홈
 router.get("/", allArticle)
@@ -9,9 +9,9 @@ router.get("/", allArticle)
 router.get("/:id", detailArticle)
 // 게시글 작성
 router.post("/", postArticle)
-// // 게시글 수정
-// router.put("/:id", putArticle)
-// // 게시글 삭제
-// router.delete("/:id", delArticle)
+// 게시글 수정
+router.put("/:id", putArticle)
+// 게시글 삭제
+router.delete("/:id", delArticle)
 
 module.exports = router
