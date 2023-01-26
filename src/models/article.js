@@ -1,4 +1,5 @@
 const { Sequelize, DataTypes } = require('sequelize');
+const { u } = require('./user');
 
 const sequelize = new Sequelize('sparta_backup', 'sparta', 'tmvkfmxk2022', {
     host: 'caredog-test.c0o6spnernvu.ap-northeast-2.rds.amazonaws.com',
@@ -21,5 +22,14 @@ const a = sequelize.define('articles', {
     createdAt: 'created_at',
     updatedAt: false
 });
+
+a.u = a.belongsTo(u, {
+    foreignKey: 'user_id'
+})
+
+u.a = u.hasMany(a, {
+    foreignKey: 'user_id'
+})
+// 순환참조 멈춰!
 
 module.exports = {a}

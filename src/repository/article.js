@@ -1,8 +1,14 @@
 const {a} = require("../models/article.js")
+const {u} = require("../models/user")
 
 // 전체 게시글 (홈)
 const getArticles = async (perPage, startIndex) => {
-    const {count, rows} = await a.findAndCountAll({order: [['id', 'desc']], offset: startIndex, limit: perPage})
+    const {count, rows} = await a.findAndCountAll({include: [{
+        model: u,
+        attributes: {
+            exclude: ["password"]
+        }
+    }], order: [['id', 'desc']], offset: startIndex, limit: perPage})
     const lastPage = Math.ceil(count / perPage)
     return {lastPage,rows}
 }
