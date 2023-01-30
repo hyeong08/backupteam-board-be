@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const {jwtConfig} = require("../config/config")
-const {getArticles, getArticle, createArticle, updateArticle, deleteArticle} = require('../repository/article')
+const {getArticles, getArticle, createArticle, updateArticle, deleteArticle, getCountOfArticles} = require('../repository/article')
 
 const allArticle = async (req, res) => {
     const { page } = req.query
@@ -54,4 +54,15 @@ const delArticle = async (req, res) => {
     res.json({message : "삭제 완료"})
 }
 
-module.exports = {allArticle, detailArticle, postArticle, putArticle, delArticle}
+const getArticlesController = async (req, res) => {
+    const size = await getCountOfArticles()
+    const articles = await getArticles()
+    res.send({
+        pagination: {
+            size: size
+        },
+        articles
+    }) 
+}
+
+module.exports = {allArticle, detailArticle, postArticle, putArticle, delArticle, getArticlesController}

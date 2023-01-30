@@ -10,7 +10,7 @@ const getUserByEmailAndPassword = async (email, password) => {
  const getUserInfo = async (id) => {
     return await u.findByPk(id, {include: [{
         model: a,
-        limit: 3
+        limit: 20
     }]})
 }
 

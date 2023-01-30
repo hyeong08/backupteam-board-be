@@ -30,6 +30,6 @@ a.u = a.belongsTo(u, {
 u.a = u.hasMany(a, {
     foreignKey: 'user_id'
 })
-// 순환참조 멈춰!
+// 순환참조로 인해 user.js에 넣으면 무한루프로 돌기때문에 article.js에 넣어줌
 
 module.exports = {a}
